@@ -10,12 +10,13 @@ json.encoder.encode_basestring_ascii(command)
 
 async def main(host,port,command):
     try:
-        connection = await asyncio.open_connection(host= host,port= port)
+        writer , reader = await asyncio.open_connection(host= host,port= port)
         print( "connected to ({host}:{port})")
-        connection.write("{command}\n".encode())
-        data = await connection.read(10000)
+        writer.write("{command}\n".encode())
+        data = await reader.read(10000)
         formated = json.dumps(data,ident=4)
         print(formated)
+        writer.close()
     except Exception as e :
         raise Exception("ERROR:%s", e)
     
