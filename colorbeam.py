@@ -43,9 +43,9 @@ class ColorBeamLightInstance:
         self._connected = True
 
     async def disconnect(self):
-        await self._writer.close()
+        self._writer.close()
+        self._writer.wait_closed()
         self._connected = False
-    
 
     
     
