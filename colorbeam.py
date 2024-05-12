@@ -34,6 +34,10 @@ class ColorBeamLightInstance:
     def port(self):
         return self.port
     
+    @property
+    def id(self):
+        return self.id
+    
     async def turn_on(self):
         command = None
     

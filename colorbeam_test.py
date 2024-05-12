@@ -13,7 +13,7 @@ async def main(host,port,command):
         reader,writer = await asyncio.open_connection(host= host,port= port)
         print( "connected to ({host}:{port})")
         writer.write("{command}\n".encode())
-        data = await reader.read(10000)
+        data = await reader.read(-1)
         formated = json.dumps(data,ident=4)
         print(formated)
         writer.close()
