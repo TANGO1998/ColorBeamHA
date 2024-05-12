@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import json
 
 LOGGER = logging.getLogger(__name__)
 
@@ -12,7 +13,8 @@ class ColorBeamLightInstance:
         self._reader = None
         self._writer = None
         self._brightness = None
-        self._isRGBW = None 
+        self._isRGBW = None
+        self._isOn = None 
     
     async def _send(self,command:str):
         if (not self._connected):
@@ -36,10 +38,20 @@ class ColorBeamLightInstance:
     
     @property
     def id(self):
-        return self.id
+        return self._id
     
     async def turn_on(self):
-        command = None
+        command = """{"command":"SetLoads","params":[{"id":%s,"d":750,l":255}]}""".format(self._id)
+        await self._send(json.encoder.encode_basestring_ascii(command))
+        self._isOn = True
+    async def turn_off(self):
+        command = """{"command":"SetLoads","params":[{"id":%s,"d":750,"l":0}]}""".format(self._id)
+        await self._send(json.encoder.encode_basestring_ascii(command))
+        self._isOn = False
+
+    async def setBrightness(self,brightness):
+        command = """{"command":"SetLoads","params":[{"id":%s,"d":750,"l":%d}]}""".format(self._id,brightness)
+        await self._send(json.encoder.encode_basestring_ascii(command))
     
     async def connect(self):
         self._reader , self._writer = await asyncio.open_connection(host=self._ipAddress,port=self._port,ssl_handshake_timeout=40)
@@ -50,6 +62,3 @@ class ColorBeamLightInstance:
         self._writer.close()
         self._writer.wait_closed()
         self._connected = False
-
-    
-    
