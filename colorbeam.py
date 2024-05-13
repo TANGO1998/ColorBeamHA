@@ -13,6 +13,7 @@ class ColorBeamLightInstance:
         self._reader = None
         self._writer = None
         self._brightness = None
+        self._temp = None
         self._isRGBW = None
         self._isOn = None 
     
@@ -21,8 +22,9 @@ class ColorBeamLightInstance:
             await self.connect()
 
         await self._connected
-        self._writer.write(command.encode())
-        
+        self._writer.write(json.dumps(command).encode('utf-8')+b'\n')
+
+        self.disconnect()
     
     @property
     def is_on(self):
@@ -41,20 +43,27 @@ class ColorBeamLightInstance:
         return self._id
     
     async def turn_on(self):
-        command = """{"command":"SetLoads","params":[{"id":%s,"d":750,l":255}]}""".format(self._id)
-        await self._send(json.encoder.encode_basestring_ascii(command))
+        command ={"command":"SetLoads","params":[{"id":self._id,"d":750,"l":255}]}
+        await self._send(command)
         self._isOn = True
     async def turn_off(self):
-        command = """{"command":"SetLoads","params":[{"id":%s,"d":750,"l":0}]}""".format(self._id)
-        await self._send(json.encoder.encode_basestring_ascii(command))
+        command = {"command":"SetLoads","params":[{"id":self.id,"d":750,"l":0}]}
+        await self._send(command)
         self._isOn = False
 
     async def setBrightness(self,brightness):
-        command = """{"command":"SetLoads","params":[{"id":%s,"d":750,"l":%d}]}""".format(self._id,brightness)
-        await self._send(json.encoder.encode_basestring_ascii(command))
+        command = {"command":"SetLoads","params":[{"id":self._id,"d":750,"l":brightness}]}
+        await self._send(command)
+        self._brightness = brightness
+        self._isOn = True
+    
+    async def setTemp(self,temp):
+        command = {"command":"SetLoads","params":[{"id":self._id,"d":750,"k":self._temp}]}
+        await self._send()
+        self._temp = temp
     
     async def connect(self):
-        self._reader , self._writer = await asyncio.open_connection(host=self._ipAddress,port=self._port,ssl_handshake_timeout=40)
+        self._reader , self._writer = await asyncio.open_connection(host=self._ipAddress,port=self._port)
         await asyncio.sleep(1)
         self._connected = True
 
