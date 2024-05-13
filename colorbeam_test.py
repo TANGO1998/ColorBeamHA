@@ -5,20 +5,21 @@ import json
 LOGGER = logging.getLogger(__name__)
 host = "192.168.8.172"
 port = "3334"
-command = """{"command":"GetLoads"}"""
-json.encoder.encode_basestring_ascii(command)
+command = {"command":"SetLoads", "params":[{"id":180,"d":750,"l":0}]}
 
-async def main(host,port,command):
-    try:
-        reader,writer = await asyncio.open_connection(host= host,port= port)
-        print( "connected to ({host}:{port})")
-        writer.write("{command}\n".encode())
-        data = await reader.read(-1)
-        formated = json.dumps(data,ident=4)
-        print(formated)
-        writer.close()
-        await writer.wait_closed()
-    except Exception as e :
-        raise Exception("ERROR:%s", e)
+async def send_json_via_telnet(host, port, json_data):
+
+    reader, writer = await asyncio.open_connection(host, port)
+
+    data_to_send = json.dumps(json_data).encode('utf-8')
+    writer.write(data_to_send + b'\n') 
+    data = await reader.read(-1) 
+
+    writer.close()
+
+    if data:
+        print(f"Received response from server: {data.decode('utf-8')}")
+    else:
+        print("No response received from server.")
     
-asyncio.run(main(host,port,command))
+asyncio.run(send_json_via_telnet(host,port,command))
