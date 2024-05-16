@@ -46,7 +46,7 @@ class ColorBeamLightInstance:
         return self._id
     
     async def turn_on(self):
-        command ={"command":"SetLoads","params":[{"id":self._id,"d":750,"l":255}]}
+        command ={"command":"SetLoads","params":[{"id":self.id,"d":750,"l":255}]}
         await self._send(command)
         LOGGER.debug('command sent:%s').__format__(command)
         self._isOn = True
@@ -57,20 +57,20 @@ class ColorBeamLightInstance:
         self._isOn = False
 
     async def setBrightness(self,brightness):
-        command = {"command":"SetLoads","params":[{"id":self._id,"d":750,"l":brightness}]}
+        command = {"command":"SetLoads","params":[{"id":self.id,"d":750,"l":brightness}]}
         await self._send(command)
         LOGGER.debug('command sent:%s').__format__(command)
         self._brightness = brightness
         self._isOn = True
     
     async def setTemp(self,temp):
-        command = {"command":"SetLoads","params":[{"id":self._id,"d":750,"k":self._temp}]}
+        command = {"command":"SetLoads","params":[{"id":self.id,"d":750,"k":self._temp}]}
         await self._send(command)
         LOGGER.debug('command sent:%s').__format__(command)
         self._temp = temp
     
     async def update(self):
-        command = {"command":"GetLoadStats","params":[self._id]}
+        command = {"command":"GetLoadStats","params":[self.id]}
         await self._send(command)
         LOGGER.debug('command Sent:%s').__format__(command)
         data = await self._reader.read(10000)
