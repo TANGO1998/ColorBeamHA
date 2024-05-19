@@ -4,13 +4,13 @@ import logging
 
 import awesomelights
 import voluptuous as vol
-import colorbeam as CB
+from colorbeam import ColorBeamLightInstance
 
 # Import the device class from the component that you want to support
 import homeassistant.helpers.config_validation as cv
 from homeassistant.components.light import (ATTR_BRIGHTNESS, PLATFORM_SCHEMA,
                                             LightEntity)
-from homeassistant.const import CONF_HOST, CONF_PASSWORD, CONF_USERNAME
+from homeassistant.const import CONF_HOST, CONF_NAME, CONF_PORT
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType
@@ -21,8 +21,8 @@ _LOGGER = logging.getLogger("colorbeam")
 # Validation of the user's configuration
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Required(CONF_HOST): cv.string,
-    vol.Optional(CONF_USERNAME, default='admin'): cv.string,
-    vol.Optional(CONF_PASSWORD): cv.string,
+    vol.Required(CONF_PORT): cv.string,
+    vol.Optional(CONF_NAME): cv.string,
 })
 
 def setup_platform(
@@ -34,29 +34,34 @@ def setup_platform(
     """Set up the ColorBeam Light platform."""
     # Assign configuration variables.
     # The configuration check takes care they are present.
-    id = config[CONF_HOST]
-    username = config[CONF_USERNAME]
-    password = config.get(CONF_PASSWORD)
+    # id = config[CONF_HOST]
+    # username = config[CONF_USERNAME]
+    # password = config.get(CONF_PASSWORD)
 
-    # Setup connection with devices/cloud
-    hub = awesomelights.Hub(host, username, password)
+    # # Setup connection with devices/cloud
+    # hub = awesomelights.Hub(host, username, password)
 
-    # Verify that passed in configuration works
-    if not hub.is_valid_login():
-        _LOGGER.error("Could not connect to AwesomeLight hub")
-        return
+    # # Verify that passed in configuration works
+    # if not hub.is_valid_login():
+    #     _LOGGER.error("Could not connect to AwesomeLight hub")
+    #     return
 
+    light = {
+        "IP" : config[CONF_HOST],
+        "PORT" : config[CONF_PORT],
+        "NAME" : config[CONF_NAME]
+    }
     # Add devices
-    add_entities(AwesomeLight(light) for light in hub.lights())
+    add_entities([CbLight(light)])
 
 
-class AwesomeLight(LightEntity):
+class CbLight(LightEntity):
     """Representation of an ColorBeam Light."""
 
     def __init__(self, light) -> None:
         """Initialize an AwesomeLight."""
-        self._light = light
-        self._name = light.name
+        self._light = ColorBeamLightInstance(light["IP"],light["PORT"],)
+        self._name = light["NAME"]
         self._state = None
         self._brightness = None
 
