@@ -90,9 +90,14 @@ class ColorBeamLightInstance:
         LOGGER.debug('instance updated')
     
     async def connect(self):
-        self._reader , self._writer = await asyncio.open_connection(host=self._ipAddress,port=self._port)
-        await asyncio.sleep(1)
-        self._connected = True
+        connect = asyncio.open_connection(host=self._ipAddress,port=self._port)
+        try:
+            self._reader , self._writer = await asyncio.wait_for(connect,timeout=10)
+            await asyncio.sleep(1)
+            self._connected = True
+        except asyncio.TimeoutError:
+            pass
+            LOGGER.warning("WARNING: Connection Timeout")
 
     async def disconnect(self):
         self._writer.close()
