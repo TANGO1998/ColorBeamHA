@@ -15,12 +15,15 @@ async def send_json_via_telnet(host, port, json_data):
     data_to_send = json.dumps(json_data).encode('utf-8')
     writer.write(data_to_send + b'\n') 
     data = await reader.read(10000) 
-
+    data = json.loads(data.decode('utf-8'))
     writer.close()
 
     if data:
-        print(f"Received response from server: {json.dump(data.decode('utf-8'))}")
+        print(f"Received response from server: {json.dumps(data,indent=4)}")
     else:
         print("No response received from server.")
+    # for x in data["data"]["load_status"]:
+    #     if x['l']:
+    #         print(f"for id :{x['id']} : l value {x['l']}")
     
 asyncio.run(send_json_via_telnet(host,port,command))

@@ -86,6 +86,7 @@ class ColorBeamLightInstance:
             self._RGBValue["r"] = data["r"]
             self._RGBValue["G"] = data["g"]
             self._RGBValue["B"] = data["b"]
+            self._RGBValue["W"] = data["w"]
         LOGGER.debug('instance updated')
     
     async def connect(self):
