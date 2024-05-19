@@ -1,0 +1,1 @@
+"""represenation of a ColorBeam Light"""
