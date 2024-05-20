@@ -23,7 +23,7 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Required(CONF_IP_ADDRESS): cv.string,
     vol.Required(CONF_PORT): cv.string,
     vol.Optional(CONF_NAME): cv.string,
-    vol.Required(CONF_TYPE): cv.string,
+    vol.Required(CONF_ID): cv.string,
     vol.Required(CONF_TYPE): cv.string
 })
 
@@ -51,7 +51,8 @@ def setup_platform(
     light = {
         "IP" : config[CONF_IP_ADDRESS],
         "PORT" : config[CONF_PORT],
-        "NAME" : config[CONF_NAME]
+        "NAME" : config[CONF_NAME],
+        "ID" : config[CONF_ID]
     }
     # Add devices
     add_entities([CbLight(light)])
@@ -62,10 +63,10 @@ class CbLight(LightEntity):
 
     def __init__(self, light) -> None:
         """Initialize an AwesomeLight."""
-        self._light = ColorBeamLightInstance(light["IP"],light["PORT"],)
+        self._light = ColorBeamLightInstance(light["IP"],light["PORT"],light["ID"])
         self._name = light["NAME"]
         self._state = self._light.is_on()
-        self._brightness = self._light.Getbrightness
+        self._brightness = self._light.Getbrightness()
 
     @property
     def name(self) -> str:
@@ -92,7 +93,10 @@ class CbLight(LightEntity):
         You can skip the brightness part if your light does not support
         brightness control.
         """
-        if kwargs.get(ATTR_BRIGHTNESS)
+        if kwargs.get(ATTR_BRIGHTNESS):
+            self._light.setBrightness(kwargs.get(ATTR_BRIGHTNESS,255))
+        else:
+            self._light.turn_on()
 
     def turn_off(self, **kwargs: Any) -> None:
         """Instruct the light to turn off."""

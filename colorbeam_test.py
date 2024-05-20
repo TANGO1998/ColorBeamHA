@@ -5,7 +5,7 @@ import json
 LOGGER = logging.getLogger(__name__)
 host = "192.168.8.172"
 port = "3334"
-command = {"command":"GetLoadStatus"}
+command = {"command":"SetLoads","params":[{"id":180,"d":750,"k":3200,"l":204}]}
 
 async def send_json_via_telnet(host, port, json_data):
     fut =  asyncio.open_connection(host, port)
