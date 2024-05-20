@@ -10,7 +10,7 @@ from colorbeam import ColorBeamLightInstance
 import homeassistant.helpers.config_validation as cv
 from homeassistant.components.light import (ATTR_BRIGHTNESS, PLATFORM_SCHEMA,
                                             LightEntity)
-from homeassistant.const import CONF_HOST, CONF_NAME, CONF_PORT
+from homeassistant.const import CONF_IP_ADDRESS, CONF_NAME, CONF_PORT, CONF_TYPE, CONF_ID
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType
@@ -20,9 +20,11 @@ _LOGGER = logging.getLogger("colorbeam")
 
 # Validation of the user's configuration
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
-    vol.Required(CONF_HOST): cv.string,
+    vol.Required(CONF_IP_ADDRESS): cv.string,
     vol.Required(CONF_PORT): cv.string,
     vol.Optional(CONF_NAME): cv.string,
+    vol.Required(CONF_TYPE): cv.string,
+    vol.Required(CONF_TYPE): cv.string
 })
 
 def setup_platform(
@@ -47,7 +49,7 @@ def setup_platform(
     #     return
 
     light = {
-        "IP" : config[CONF_HOST],
+        "IP" : config[CONF_IP_ADDRESS],
         "PORT" : config[CONF_PORT],
         "NAME" : config[CONF_NAME]
     }
@@ -62,8 +64,8 @@ class CbLight(LightEntity):
         """Initialize an AwesomeLight."""
         self._light = ColorBeamLightInstance(light["IP"],light["PORT"],)
         self._name = light["NAME"]
-        self._state = None
-        self._brightness = None
+        self._state = self._light.is_on()
+        self._brightness = self._light.Getbrightness
 
     @property
     def name(self) -> str:
@@ -90,8 +92,7 @@ class CbLight(LightEntity):
         You can skip the brightness part if your light does not support
         brightness control.
         """
-        self._light.brightness = kwargs.get(ATTR_BRIGHTNESS, 255)
-        self._light.turn_on()
+        if kwargs.get(ATTR_BRIGHTNESS)
 
     def turn_off(self, **kwargs: Any) -> None:
         """Instruct the light to turn off."""
@@ -104,4 +105,4 @@ class CbLight(LightEntity):
         """
         self._light.update()
         self._state = self._light.is_on()
-        self._brightness = self._light.brightness
+        self._brightness = self._light.Getbrightness()

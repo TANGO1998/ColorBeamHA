@@ -45,6 +45,10 @@ class ColorBeamLightInstance:
     def id(self):
         return self._id
     
+    @property
+    def Getbrightness(self):
+        return self._brightness
+    
     async def turn_on(self):
         command ={"command":"SetLoads","params":[{"id":self.id,"d":750,"l":255}]}
         await self._send(command)
