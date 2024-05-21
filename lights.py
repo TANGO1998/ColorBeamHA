@@ -8,7 +8,7 @@ from colorbeam import ColorBeamLightInstance
 
 # Import the device class from the component that you want to support
 import homeassistant.helpers.config_validation as cv
-from homeassistant.components.light import (ATTR_BRIGHTNESS, PLATFORM_SCHEMA,
+from homeassistant.components.light import (SUPPORT_BRIGHTNESS,SUPPORT_COLOR_TEMP,ATTR_COLOR_TEMP_KELVIN,ATTR_BRIGHTNESS, PLATFORM_SCHEMA,
                                             LightEntity)
 from homeassistant.const import CONF_IP_ADDRESS, CONF_NAME, CONF_PORT, CONF_TYPE, CONF_ID
 from homeassistant.core import HomeAssistant
@@ -95,6 +95,9 @@ class CbLight(LightEntity):
         """
         if kwargs.get(ATTR_BRIGHTNESS):
             self._light.setBrightness(kwargs.get(ATTR_BRIGHTNESS,255))
+        elif kwargs.get(ATTR_COLOR_TEMP_KELVIN):
+            self._light.setTemp(kwargs.get(ATTR_COLOR_TEMP_KELVIN))
+            self._light.turn_on()
         else:
             self._light.turn_on()
 

@@ -1,1 +1,1 @@
-"""represenation of a ColorBeam Light"""
+"""represenation of a ColorBeam BI Light"""

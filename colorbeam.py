@@ -5,7 +5,7 @@ import json
 LOGGER = logging.getLogger(__name__)
 
 class ColorBeamLightInstance:
-    def __init__(self,ipAddress:str,port:str,id=str) -> None:
+    def __init__(self,ipAddress:str,port:str,id=int) -> None:
         self._ipAddress = ipAddress
         self._port = port
         self._id = id
@@ -22,7 +22,6 @@ class ColorBeamLightInstance:
         if (not self._connected):
             await self.connect()
 
-        await self._connected
         self._writer.write(json.dumps(command).encode('utf-8')+b'\n')
         LOGGER.debug('command Sent:%s'.format(command))
         await self.update()
@@ -50,18 +49,18 @@ class ColorBeamLightInstance:
         return self._brightness
     
     async def turn_on(self):
-        command ={"command":"SetLoads","params":[{"id":self.id,"d":750,"l":255}]}
+        command ={"command":"SetLoads","params":[{"id":self._id,"d":750,"l":255}]}
         await self._send(command)
         LOGGER.debug('command sent:%s'.format(command))
         self._isOn = True
     async def turn_off(self):
-        command = {"command":"SetLoads","params":[{"id":self.id,"d":750,"l":0}]}
+        command = {"command":"SetLoads","params":[{"id":self._id,"d":750,"l":0}]}
         await self._send(command)
         LOGGER.debug('command sent:%s'.format(command))
         self._isOn = False
 
     async def setBrightness(self,brightness):
-        command = {"command":"SetLoads","params":[{"id":self.id,"d":750,"l":brightness}]}
+        command = {"command":"SetLoads","params":[{"id":self._id,"d":750,"l":brightness}]}
         await self._send(command)
         LOGGER.debug('command sent:%s'.format(command))
         self._brightness = brightness
@@ -86,11 +85,6 @@ class ColorBeamLightInstance:
             self._ison = False
         self._brightness = data["l"]
         self._temp = data["k"]
-        if self._isRGBW == True:
-            self._RGBValue["r"] = data["r"]
-            self._RGBValue["G"] = data["g"]
-            self._RGBValue["B"] = data["b"]
-            self._RGBValue["W"] = data["w"]
         LOGGER.debug('instance updated')
     
     async def connect(self):
@@ -101,6 +95,7 @@ class ColorBeamLightInstance:
             self._connected = True
         except asyncio.TimeoutError:
             pass
+            self._connected = False
             LOGGER.warning("WARNING: Connection Timeout")
 
     async def disconnect(self):
