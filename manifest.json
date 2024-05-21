@@ -1,0 +1,7 @@
+{
+    "domain": "ColorBeam-BI",
+    "name": "Color Beam BI light",
+    "requirements": [],
+    "iot_class": "local_polling",
+    "version": "0.1.0"
+  }
