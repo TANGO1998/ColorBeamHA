@@ -24,7 +24,7 @@ class ColorBeamLightInstance:
 
         await self._connected
         self._writer.write(json.dumps(command).encode('utf-8')+b'\n')
-        LOGGER.debug('command Sent:%s').__format__(command)
+        LOGGER.debug('command Sent:%s'.format(command))
         await self.update()
 
         self.disconnect()
@@ -52,33 +52,33 @@ class ColorBeamLightInstance:
     async def turn_on(self):
         command ={"command":"SetLoads","params":[{"id":self.id,"d":750,"l":255}]}
         await self._send(command)
-        LOGGER.debug('command sent:%s').__format__(command)
+        LOGGER.debug('command sent:%s'.format(command))
         self._isOn = True
     async def turn_off(self):
         command = {"command":"SetLoads","params":[{"id":self.id,"d":750,"l":0}]}
         await self._send(command)
-        LOGGER.debug('command sent:%s').__format__(command)
+        LOGGER.debug('command sent:%s'.format(command))
         self._isOn = False
 
     async def setBrightness(self,brightness):
         command = {"command":"SetLoads","params":[{"id":self.id,"d":750,"l":brightness}]}
         await self._send(command)
-        LOGGER.debug('command sent:%s').__format__(command)
+        LOGGER.debug('command sent:%s'.format(command))
         self._brightness = brightness
         self._isOn = True
     
     async def setTemp(self,temp):
         command = {"command":"SetLoads","params":[{"id":self.id,"d":750,"k":self._temp}]}
         await self._send(command)
-        LOGGER.debug('command sent:%s').__format__(command)
+        LOGGER.debug('command sent:%s'.format(command))
         self._temp = temp
     
     async def update(self):
         command = {"command":"GetLoadStats","params":[self.id]}
         await self._send(command)
-        LOGGER.debug('command Sent:%s').__format__(command)
+        LOGGER.debug('command Sent:%s'.format(command))
         data = await self._reader.read(10000)
-        LOGGER.debug('data Received;%s').__format__(data)
+        LOGGER.debug('data Received;%s'.format(command))
         data = data.decode('utf-8')
         if data["l"] > 0 :
             self._isOn = True
