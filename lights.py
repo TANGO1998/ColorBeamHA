@@ -23,7 +23,7 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Required(CONF_IP_ADDRESS): cv.string,
     vol.Required(CONF_PORT): cv.string,
     vol.Optional(CONF_NAME): cv.string,
-    vol.Required(CONF_ID): cv.string,
+    vol.Required(CONF_ID): cv.int,
     vol.Required(CONF_TYPE): cv.string
 })
 

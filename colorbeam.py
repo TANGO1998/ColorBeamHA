@@ -23,10 +23,9 @@ class ColorBeamLightInstance:
             await self.connect()
 
         self._writer.write(json.dumps(command).encode('utf-8')+b'\n')
+        await self._writer.drain()
         LOGGER.debug('command Sent:%s'.format(command))
-        await self.update()
-
-        self.disconnect()
+        # await self.disconnect()
     
     @property
     def is_on(self):
@@ -38,7 +37,7 @@ class ColorBeamLightInstance:
     
     @property
     def port(self):
-        return self.port
+        return self._port
     
     @property
     def id(self):
@@ -48,43 +47,53 @@ class ColorBeamLightInstance:
     def Getbrightness(self):
         return self._brightness
     
+    @property
+    def Temp(self):
+        return self._temp
+    
     async def turn_on(self):
         command ={"command":"SetLoads","params":[{"id":self._id,"d":750,"l":255}]}
         await self._send(command)
         LOGGER.debug('command sent:%s'.format(command))
+        await self.update()
         self._isOn = True
+
     async def turn_off(self):
         command = {"command":"SetLoads","params":[{"id":self._id,"d":750,"l":0}]}
         await self._send(command)
         LOGGER.debug('command sent:%s'.format(command))
+        await self.update()
         self._isOn = False
 
     async def setBrightness(self,brightness):
         command = {"command":"SetLoads","params":[{"id":self._id,"d":750,"l":brightness}]}
         await self._send(command)
         LOGGER.debug('command sent:%s'.format(command))
+        await self.update()
         self._brightness = brightness
         self._isOn = True
     
     async def setTemp(self,temp):
-        command = {"command":"SetLoads","params":[{"id":self.id,"d":750,"k":self._temp}]}
+        command = {"command":"SetLoads","params":[{"id":self.id,"d":750,"k":temp}]}
         await self._send(command)
         LOGGER.debug('command sent:%s'.format(command))
+        await self.update()
         self._temp = temp
     
     async def update(self):
-        command = {"command":"GetLoadStats","params":[self.id]}
+        command = {"command":"GetLoadStatus","params":[self.id]}
         await self._send(command)
         LOGGER.debug('command Sent:%s'.format(command))
-        data = await self._reader.read(10000)
-        LOGGER.debug('data Received;%s'.format(command))
+        data = await self._reader.readuntil(b"}}\n")
+        LOGGER.debug('data Received:%s'.format(data))
         data = data.decode('utf-8')
-        if data["l"] > 0 :
-            self._isOn = True
-        else:
-            self._ison = False
-        self._brightness = data["l"]
-        self._temp = data["k"]
+        print(data)
+        # if data["l"] > 0 :
+        #     self._isOn = True
+        # else:
+        #     self._ison = False
+        # self._brightness = data["l"]
+        # self._temp = data["k"]
         LOGGER.debug('instance updated')
     
     async def connect(self):
@@ -100,5 +109,5 @@ class ColorBeamLightInstance:
 
     async def disconnect(self):
         self._writer.close()
-        self._writer.wait_closed()
+        await self._writer.wait_closed()
         self._connected = False
