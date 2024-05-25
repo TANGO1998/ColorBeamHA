@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import logging
 
-import awesomelights
 import voluptuous as vol
 from colorbeam import ColorBeamLightInstance
 
@@ -23,7 +22,8 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Required(CONF_IP_ADDRESS): cv.string,
     vol.Required(CONF_PORT): cv.string,
     vol.Optional(CONF_NAME): cv.string,
-    vol.Required(CONF_ID): cv.string,
+    vol.Required(CONF_ID): cv.int,
+    vol.Required(CONF_TYPE): cv.string
 })
 
 def setup_platform(
