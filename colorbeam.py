@@ -5,7 +5,7 @@ import json
 LOGGER = logging.getLogger(__name__)
 
 class ColorBeamLightInstance:
-    def __init__(self,ipAddress:str,port:str,id=int) -> None:
+    def __init__(self,ipAddress:str,port:str,id=str) -> None:
         self._ipAddress = ipAddress
         self._port = port
         self._id = id
@@ -19,12 +19,16 @@ class ColorBeamLightInstance:
         self._isOn = None 
     
     async def _send(self,command:str):
-        if (not self._connected):
-            await self.connect()
+        try:
+            if (not self._connected):
+                await self.connect()
 
-        self._writer.write(json.dumps(command).encode('utf-8')+b'\n')
-        await self._writer.drain()
-        LOGGER.debug('command Sent:%s'.format(command))
+            self._writer.write(json.dumps(command).encode('utf-8')+b'\n')
+            await self._writer.drain()
+            LOGGER.debug('command Sent:%s'.format(command))
+        except asyncio.TimeoutError:
+            pass
+            LOGGER.warning("WARNING: Connection Timeout")
         # await self.disconnect()
     
     @property
@@ -87,13 +91,13 @@ class ColorBeamLightInstance:
         data = await self._reader.readuntil(b"}}\n")
         LOGGER.debug('data Received:%s'.format(data))
         data = data.decode('utf-8')
-        print(data)
-        # if data["l"] > 0 :
-        #     self._isOn = True
-        # else:
-        #     self._ison = False
-        # self._brightness = data["l"]
-        # self._temp = data["k"]
+        response = data.split()[1]
+        if response['l'] > 0 :
+            self._isOn = True
+        else:
+            self._ison = False
+        self._brightness = response['l']
+        self._temp = response['l']
         LOGGER.debug('instance updated')
     
     async def connect(self):
