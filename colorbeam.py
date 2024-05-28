@@ -16,6 +16,7 @@ class ColorBeamLightInstance:
         self._temp = None
         self._isRGBW = None
         self._RGBValue = dict()
+        self._data = None
         self._isOn = None 
     
     async def _send(self,command:str):
@@ -33,7 +34,7 @@ class ColorBeamLightInstance:
     
     @property
     def is_on(self):
-        return self._brightness
+        return self._isOn
     
     @property
     def ipAddress(self):
@@ -58,6 +59,7 @@ class ColorBeamLightInstance:
     async def turn_on(self):
         command ={"command":"SetLoads","params":[{"id":self._id,"d":750,"l":255}]}
         await self._send(command)
+        await asyncio.sleep(1)
         LOGGER.debug('command sent:%s'.format(command))
         await self.update()
         self._isOn = True
@@ -66,11 +68,12 @@ class ColorBeamLightInstance:
         command = {"command":"SetLoads","params":[{"id":self._id,"d":750,"l":0}]}
         await self._send(command)
         LOGGER.debug('command sent:%s'.format(command))
+        await asyncio.sleep(1)
         await self.update()
         self._isOn = False
 
     async def setBrightness(self,brightness):
-        command = {"command":"SetLoads","params":[{"id":self._id,"d":750,"l":brightness}]}
+        command = {"command":"SetLoads","params":[{"id":self.id,"d":750,"l":brightness}]}
         await self._send(command)
         LOGGER.debug('command sent:%s'.format(command))
         await self.update()
@@ -91,13 +94,14 @@ class ColorBeamLightInstance:
         data = await self._reader.readuntil(b"}}\n")
         LOGGER.debug('data Received:%s'.format(data))
         data = data.decode('utf-8')
-        response = data.split()[1]
-        if response['l'] > 0 :
+        print(data)
+        response = json.loads(data.split()[1])
+        if response["data"]["load_status"][0]["l"] > 0 :
             self._isOn = True
         else:
-            self._ison = False
-        self._brightness = response['l']
-        self._temp = response['l']
+            self._isOn = False
+        self._brightness = response["data"]["load_status"][0]["l"]
+        self._temp = response["data"]["load_status"][0]["k"]
         LOGGER.debug('instance updated')
     
     async def connect(self):
