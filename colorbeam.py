@@ -15,7 +15,7 @@ class ColorBeamLightInstance:
         self._brightness = None
         self._temp = None
         self._isRGBW = None
-        self._RGBValue = dict()
+        self._RGBValue = set()
         self._data = None
         self._isOn = None 
     
@@ -27,41 +27,43 @@ class ColorBeamLightInstance:
             self._writer.write(json.dumps(command).encode('utf-8')+b'\n')
             await self._writer.drain()
             LOGGER.debug('command Sent:%s'.format(command))
+            #await self.disconnect()
         except asyncio.TimeoutError:
             pass
             LOGGER.warning("WARNING: Connection Timeout")
-        # await self.disconnect()
+        
     
     @property
-    def is_on(self):
+    def is_on(self)->bool:
         return self._isOn
     
     @property
-    def ipAddress(self):
+    def ipAddress(self)->str:
         return self._ipAddress
     
     @property
-    def port(self):
+    def port(self)->str:
         return self._port
     
     @property
-    def id(self):
+    def id(self)->str:
         return self._id
     
     @property
-    def Getbrightness(self):
+    def Getbrightness(self)->int:
         return self._brightness
     
     @property
-    def Temp(self):
+    def Temp(self)-> int:
         return self._temp
     
-    async def turn_on(self):
-        command ={"command":"SetLoads","params":[{"id":self._id,"d":750,"l":255}]}
+    async def turn_on(self,brightness):
+        command ={"command":"SetLoads","params":[{"id":self._id,"d":750,"l":brightness}]}
         await self._send(command)
         await asyncio.sleep(1)
         LOGGER.debug('command sent:%s'.format(command))
-        await self.update()
+        #await self.update()
+        self._brightness = brightness
         self._isOn = True
 
     async def turn_off(self):
@@ -69,14 +71,14 @@ class ColorBeamLightInstance:
         await self._send(command)
         LOGGER.debug('command sent:%s'.format(command))
         await asyncio.sleep(1)
-        await self.update()
+       #await self.update()
         self._isOn = False
 
     async def setBrightness(self,brightness):
         command = {"command":"SetLoads","params":[{"id":self.id,"d":750,"l":brightness}]}
         await self._send(command)
         LOGGER.debug('command sent:%s'.format(command))
-        await self.update()
+        #await self.update()
         self._brightness = brightness
         self._isOn = True
     
@@ -84,7 +86,7 @@ class ColorBeamLightInstance:
         command = {"command":"SetLoads","params":[{"id":self.id,"d":750,"k":temp}]}
         await self._send(command)
         LOGGER.debug('command sent:%s'.format(command))
-        await self.update()
+        #await self.update()
         self._temp = temp
     
     async def update(self):
@@ -94,11 +96,11 @@ class ColorBeamLightInstance:
         data = await self._reader.readuntil(b"}}\n")
         LOGGER.debug('data Received:%s'.format(data))
         data = data.decode('utf-8')
-        print(data)
-        response = json.loads(data.split()[1])
+        response = json.loads(data.split()[0])
+        print(response)
         if response["data"]["load_status"][0]["l"] > 0 :
             self._isOn = True
-        else:
+        if response["data"]["load_status"][0]["l"] == 0 :
             self._isOn = False
         self._brightness = response["data"]["load_status"][0]["l"]
         self._temp = response["data"]["load_status"][0]["k"]
