@@ -28,7 +28,7 @@ class ColorBeamRGBLightInstance:
             LOGGER.debug('command Sent:%s'.format(command))
             #await self.disconnect()
         except asyncio.TimeoutError:
-            pass
+            return
             LOGGER.warning("WARNING: Connection Timeout")
         
     
@@ -53,8 +53,8 @@ class ColorBeamRGBLightInstance:
         return self._brightness
     
     @property
-    def getRGB(self)-> list:
-        return self._RGBValue
+    def getRGB(self)-> tuple:
+        return tuple(self._RGBValue)
     
     async def turn_on(self,brightness):
         command ={"command":"SetLoads","params":[{"id":self._id,"d":750,"l":brightness}]}
@@ -81,12 +81,12 @@ class ColorBeamRGBLightInstance:
         self._brightness = brightness
         self._isOn = True
     
-    async def setRGB(self,RGB:list):
+    async def setRGB(self,RGB:tuple):
         command = {"command":"SetLoads","params":[{"id":self.id,"r":RGB[0],"g":RGB[1],"b":RGB[2]}]}
         await self._send(command)
         LOGGER.debug('command sent:%s'.format(command))
         #await self.update()
-        self._RGBValue = set(RGB)
+        self._RGBValue = list(RGB)
     
     async def update(self):
         command = {"command":"GetLoadStatus","params":[self.id]}
@@ -114,7 +114,7 @@ class ColorBeamRGBLightInstance:
             await asyncio.sleep(1)
             self._connected = True
         except asyncio.TimeoutError:
-            pass
+            return
             self._connected = False
             LOGGER.warning("WARNING: Connection Timeout")
 

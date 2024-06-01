@@ -29,7 +29,7 @@ class ColorBeamLightInstance:
             LOGGER.debug('command Sent:%s'.format(command))
             #await self.disconnect()
         except asyncio.TimeoutError:
-            pass
+            return
             LOGGER.warning("WARNING: Connection Timeout")
         
     
@@ -113,7 +113,7 @@ class ColorBeamLightInstance:
             await asyncio.sleep(1)
             self._connected = True
         except asyncio.TimeoutError:
-            pass
+            return
             self._connected = False
             LOGGER.warning("WARNING: Connection Timeout")
 
