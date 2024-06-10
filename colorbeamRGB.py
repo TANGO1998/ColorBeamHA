@@ -27,9 +27,15 @@ class ColorBeamRGBLightInstance:
             await self._writer.drain()
             _LOGGER.debug('command Sent:%s'.format(command))
             #await self.disconnect()
+<<<<<<< HEAD
         except Exception as e:
             pass
             _LOGGER.warning("WARNING: Connection Timeout")
+=======
+        except asyncio.TimeoutError:
+            return
+            LOGGER.warning("WARNING: Connection Timeout")
+>>>>>>> 4bfe185a63360cf9df70c2a53583865bafd1acfb
         
     
     @property
@@ -114,8 +120,13 @@ class ColorBeamRGBLightInstance:
             self._reader , self._writer = await asyncio.wait_for(connect,timeout=10)
             await asyncio.sleep(1)
             self._connected = True
+<<<<<<< HEAD
         except Exception as e:
             pass
+=======
+        except asyncio.TimeoutError:
+            return
+>>>>>>> 4bfe185a63360cf9df70c2a53583865bafd1acfb
             self._connected = False
             _LOGGER.warning("WARNING: Connection Timeout")
 
