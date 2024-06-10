@@ -62,9 +62,7 @@ class ColorBeamLightInstance:
         await self._send(command)
         _LOGGER.debug('command sent:%s'.format(command))
         await asyncio.sleep(2)
-        await self.update()
-        self._brightness = brightness
-        self._isOn = True
+        #await self.update()
 
     async def turn_off(self):
         command = {"command":"SetLoads","params":[{"id":self._id,"d":750,"l":0}]}
@@ -72,22 +70,18 @@ class ColorBeamLightInstance:
         _LOGGER.debug('command sent:%s'.format(command))
         await asyncio.sleep(2)
         await self.update()
-        self._isOn = False
 
     async def setBrightness(self,brightness):
         command = {"command":"SetLoads","params":[{"id":self.id,"d":750,"l":brightness}]}
         await self._send(command)
         _LOGGER.debug('command sent:%s'.format(command))
         #await self.update()
-        self._brightness = brightness
-        self._isOn = True
     
     async def setTemp(self,temp):
         command = {"command":"SetLoads","params":[{"id":self.id,"d":750,"k":temp}]}
         await self._send(command)
         _LOGGER.debug('command sent:%s'.format(command))
         #await self.update()
-        self._temp = temp
     
     async def update(self):
         command = {"command":"GetLoadStatus","params":[self.id]}
