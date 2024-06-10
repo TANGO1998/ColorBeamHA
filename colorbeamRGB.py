@@ -2,7 +2,7 @@ import asyncio
 import logging
 import json
 
-LOGGER = logging.getLogger(__name__)
+_LOGGER = logging.getLogger(__name__)
 
 class ColorBeamRGBLightInstance:
     def __init__(self,ipAddress:str,port:str,id=str) -> None:
@@ -25,11 +25,11 @@ class ColorBeamRGBLightInstance:
 
             self._writer.write(json.dumps(command).encode('utf-8')+b'\n')
             await self._writer.drain()
-            LOGGER.debug('command Sent:%s'.format(command))
+            _LOGGER.debug('command Sent:%s'.format(command))
             #await self.disconnect()
-        except asyncio.TimeoutError:
+        except Exception as e:
             pass
-            LOGGER.warning("WARNING: Connection Timeout")
+            _LOGGER.warning("WARNING: Connection Timeout")
         
     
     @property
@@ -53,59 +53,60 @@ class ColorBeamRGBLightInstance:
         return self._brightness
     
     @property
-    def getRGB(self)-> list:
-        return self._RGBValue
+    def getRGB(self)-> tuple:
+        return tuple(self._RGBValue)
     
     async def turn_on(self,brightness):
         command ={"command":"SetLoads","params":[{"id":self._id,"d":750,"l":brightness}]}
         await self._send(command)
-        await asyncio.sleep(1)
-        LOGGER.debug('command sent:%s'.format(command))
+        await asyncio.sleep(2)
+        _LOGGER.debug('command sent:%s'.format(command))
         await self.update()
-        self._brightness = brightness
-        self._isOn = True
 
     async def turn_off(self):
         command = {"command":"SetLoads","params":[{"id":self._id,"d":750,"l":0}]}
         await self._send(command)
-        LOGGER.debug('command sent:%s'.format(command))
+        _LOGGER.debug('command sent:%s'.format(command))
         await asyncio.sleep(1)
-       #await self.update()
-        self._isOn = False
+        #await self.update()
 
     async def setBrightness(self,brightness):
         command = {"command":"SetLoads","params":[{"id":self.id,"d":750,"l":brightness}]}
         await self._send(command)
-        LOGGER.debug('command sent:%s'.format(command))
+        _LOGGER.debug('command sent:%s'.format(command))
         #await self.update()
         self._brightness = brightness
         self._isOn = True
     
-    async def setRGB(self,RGB:list):
+    async def setRGB(self,RGB:tuple):
         command = {"command":"SetLoads","params":[{"id":self.id,"r":RGB[0],"g":RGB[1],"b":RGB[2]}]}
         await self._send(command)
-        LOGGER.debug('command sent:%s'.format(command))
+        _LOGGER.debug('command sent:%s'.format(command))
         #await self.update()
-        self._RGBValue = set(RGB)
+        self._RGBValue = list(RGB)
     
     async def update(self):
         command = {"command":"GetLoadStatus","params":[self.id]}
         await self._send(command)
-        LOGGER.debug('command Sent:%s'.format(command))
-        data = await self._reader.readuntil(b"}}\n")
-        LOGGER.debug('data Received:%s'.format(data))
+        _LOGGER.debug('command Sent:%s'.format(command))
+        data = await self._reader.readuntil(b"}]}}")
+        _LOGGER.debug('data Received:%s'.format(data))
         data = data.decode('utf-8')
-        response = json.loads(data.split()[0])
-        print(data)
-        if response["data"]["load_status"][0]["l"] > 0 :
-            self._isOn = True
-        if response["data"]["load_status"][0]["l"] == 0 :
-            self._isOn = False
-        self._brightness = response["data"]["load_status"][0]["l"]
-        self._RGBValue.append(response["data"]["load_status"][0]["r"])
-        self._RGBValue.append(response["data"]["load_status"][0]["g"])
-        self._RGBValue.append(response["data"]["load_status"][0]["b"])
-        LOGGER.debug('instance updated')
+        for x in data.split():
+            response = json.loads(x)
+            try:
+                if "load_status" in response["data"]:
+                    if response["data"]["load_status"][0]["l"] > 0 :
+                        self._isOn = True
+                    if response["data"]["load_status"][0]["l"] == 0 :
+                        self._isOn = False
+                    self._brightness = response["data"]["load_status"][0]["l"]
+                    self._RGBValue.append(response["data"]["load_status"][0]["r"])
+                    self._RGBValue.append(response["data"]["load_status"][0]["g"])
+                    self._RGBValue.append(response["data"]["load_status"][0]["b"])
+                    _LOGGER.debug('instance updated')
+            except Exception as e:
+                pass
     
     async def connect(self):
         connect = asyncio.open_connection(host=self._ipAddress,port=self._port)
@@ -113,10 +114,10 @@ class ColorBeamRGBLightInstance:
             self._reader , self._writer = await asyncio.wait_for(connect,timeout=10)
             await asyncio.sleep(1)
             self._connected = True
-        except asyncio.TimeoutError:
+        except Exception as e:
             pass
             self._connected = False
-            LOGGER.warning("WARNING: Connection Timeout")
+            _LOGGER.warning("WARNING: Connection Timeout")
 
     async def disconnect(self):
         self._writer.close()
