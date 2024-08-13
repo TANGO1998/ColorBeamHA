@@ -62,7 +62,7 @@ class ColorBeamLightInstance:
         await self._send(command)
         _LOGGER.debug('command sent:%s'.format(command))
         await asyncio.sleep(2)
-        #await self.update()
+        await self.update()
 
     async def turn_off(self):
         command = {"command":"SetLoads","params":[{"id":self._id,"d":750,"l":0}]}
