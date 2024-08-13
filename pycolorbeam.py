@@ -84,14 +84,14 @@ class ColorBeamLightInstance:
         #await self.update()
     
     async def update(self):
-        try:
-            command = {"command":"GetLoadStatus","params":[self.id]}
-            await self._send(command)
-            _LOGGER.debug('command Sent:%s'.format(command))
-            data = await self._reader.readuntil(b"}]}}")
-            _LOGGER.debug('data Received:%s'.format(data))
-            data = data.decode('utf-8')
-            for x in data.split("\n"):
+        command = {"command":"GetLoadStatus","params":[self.id]}
+        await self._send(command)
+        _LOGGER.debug('command Sent:%s'.format(command))
+        data = await self._reader.readuntil(b"}]}}")
+        _LOGGER.debug('data Received:%s'.format(data))
+        data = data.decode('utf-8')
+        for x in data.split("\n"):
+            try:
                 response = json.loads(x)
                 if "load_status" in response["data"]:
                     if response["data"]["load_status"][0]["l"] > 0 :
@@ -101,8 +101,8 @@ class ColorBeamLightInstance:
                     self._brightness = response["data"]["load_status"][0]["l"]
                     self._temp = response["data"]["load_status"][0]["k"]
                     _LOGGER.debug('instance updated')
-        except Exception as e:
-            pass
+            except Exception as e:
+                pass
     
     async def connect(self):
         connect = asyncio.open_connection(host=self._ipAddress,port=self._port)
@@ -200,14 +200,14 @@ class ColorBeamRGBLightInstance:
         self._RGBValue = list(RGB)
     
     async def update(self):
-        try:
-            command = {"command":"GetLoadStatus","params":[self.id]}
-            await self._send(command)
-            _LOGGER.debug('command Sent:%s'.format(command))
-            data = await self._reader.readuntil(b"}]}}")
-            _LOGGER.debug('data Received:%s'.format(data))
-            data = data.decode('utf-8')
-            for x in data.split():
+        command = {"command":"GetLoadStatus","params":[self.id]}
+        await self._send(command)
+        _LOGGER.debug('command Sent:%s'.format(command))
+        data = await self._reader.readuntil(b"}]}}")
+        _LOGGER.debug('data Received:%s'.format(data))
+        data = data.decode('utf-8')
+        for x in data.split():
+            try:
                 response = json.loads(x)
                 if "load_status" in response["data"]:
                     if response["data"]["load_status"][0]["l"] > 0 :
@@ -219,8 +219,8 @@ class ColorBeamRGBLightInstance:
                     self._RGBValue.append(response["data"]["load_status"][0]["g"])
                     self._RGBValue.append(response["data"]["load_status"][0]["b"])
                     _LOGGER.debug('instance updated')
-        except Exception as e:
-            pass
+            except Exception as e:
+                pass
     
     async def connect(self):
         connect = asyncio.open_connection(host=self._ipAddress,port=self._port)
