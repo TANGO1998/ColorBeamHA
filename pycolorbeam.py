@@ -235,3 +235,47 @@ class ColorBeamRGBLightInstance:
         self._writer.close()
         await self._writer.wait_closed()
         self._connected = False
+
+class ColorBeamBaseInstance:
+    def __init__(self,ipAddress:str,port:str,id=str) -> None:
+        self._ipAddress = ipAddress
+        self._port = port
+        self._id = id
+        self._connected = None
+        self._reader = None
+        self._writer = None
+
+    async def connect(self):
+        connect = asyncio.open_connection(host=self._ipAddress,port=self._port)
+        try:
+            self._reader , self._writer = await asyncio.wait_for(connect,timeout=10)
+            await asyncio.sleep(1)
+            self._connected = True
+        except Exception as e:
+            pass
+
+    async def disconnect(self):
+        self._writer.close()
+        await self._writer.wait_closed()
+        self._connected = False
+
+    
+    async def _send(self,command:str):
+        try:
+            if (not self._connected):
+                await self.connect()
+
+            self._writer.write(json.dumps(command).encode('utf-8')+b'\n')
+            await self._writer.drain()
+            _LOGGER.debug('command Sent:%s'.format(command))
+            #await self.disconnect()
+        except Exception as e:
+            pass
+            _LOGGER.warning("WARNING: Connection Timeout")
+
+    async def updateall(self):
+        command = {"command":"GetLoadStatus"}
+        await self._send(command)
+        _LOGGER.debug('command Sent:%s'.format(command))
+        data = await self._reader.readuntil(b"}]}}")
+        
