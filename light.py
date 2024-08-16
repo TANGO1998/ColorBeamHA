@@ -4,7 +4,7 @@ import logging
 import asyncio
 
 import voluptuous as vol
-from .colorbeam import ColorBeamLightInstance
+from .pycolorbeam import ColorBeamLightInstance
 
 # Import the device class from the component that you want to support
 import homeassistant.helpers.config_validation as cv
