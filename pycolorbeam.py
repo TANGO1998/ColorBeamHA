@@ -237,11 +237,13 @@ class ColorBeamRGBLightInstance:
         self._connected = False
 
 class ColorBeamBaseInstance:
-    def __init__(self,ipAddress:str,port:str,id=str) -> None:
+    def __init__(self,ipAddress:str,port:str) -> None:
         self._ipAddress = ipAddress
         self._port = port
         self._id = id
         self._connected = None
+        self._BILights = []
+        self._RGBLights = []
         self._reader = None
         self._writer = None
 
@@ -278,4 +280,12 @@ class ColorBeamBaseInstance:
         await self._send(command)
         _LOGGER.debug('command Sent:%s'.format(command))
         data = await self._reader.readuntil(b"}]}}")
+       # print(data)
+        data = json.loads(data.decode("utf-8"))
+        for x in data["data"]["load_status"]:
+            if "r" in x:
+                self._RGBLights.append(x["id"])
+            else:
+                self._BILights.append(x["id"])
+        return self._BILights, self._RGBLights
         
