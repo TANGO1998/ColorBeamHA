@@ -44,4 +44,68 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
         lights = []
     )
 
+    _async_check_entity_unique_id(
+        hass,
+        entity_registry,
+        platform,
+        output.uuid,
+        output.legacy_uuid,
+        entry_data.client.guid,
+    )
+    _async_check_device_identifiers(
+        hass,
+        device_registry,
+        output.uuid,
+        output.legacy_uuid,
+        entry_data.client.guid,
+    )
     
+def _async_check_entity_unique_id(
+    hass: HomeAssistant,
+    entity_registry: er.EntityRegistry,
+    platform: str,
+    uuid: str,
+    legacy_uuid: str,
+    controller_guid: str,
+) -> None:
+    """If uuid becomes available update to use it."""
+
+    if not uuid:
+        return
+
+    unique_id = f"{controller_guid}_{legacy_uuid}"
+    entity_id = entity_registry.async_get_entity_id(
+        domain=platform, platform=DOMAIN, unique_id=unique_id
+    )
+
+    if entity_id:
+        new_unique_id = f"{controller_guid}_{uuid}"
+        _LOGGER.debug("Updating entity id from %s to %s", unique_id, new_unique_id)
+        entity_registry.async_update_entity(entity_id, new_unique_id=new_unique_id)
+
+
+def _async_check_device_identifiers(
+    hass: HomeAssistant,
+    device_registry: dr.DeviceRegistry,
+    uuid: str,
+    legacy_uuid: str,
+    controller_guid: str,
+) -> None:
+    """If uuid becomes available update to use it."""
+
+    if not uuid:
+        return
+
+    unique_id = f"{controller_guid}_{legacy_uuid}"
+    device = device_registry.async_get_device(identifiers={(DOMAIN, unique_id)})
+    if device:
+        new_unique_id = f"{controller_guid}_{uuid}"
+        _LOGGER.debug("Updating device id from %s to %s", unique_id, new_unique_id)
+        device_registry.async_update_device(
+            device.id, new_identifiers={(DOMAIN, new_unique_id)}
+        )
+
+
+async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+    """Clean up resources and entities associated with the integration."""
+    return await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
