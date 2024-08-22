@@ -22,7 +22,7 @@ ATTR_UUID = "uuid"
 @dataclass(slots=True, kw_only=True)
 class ColorBeamData:
     """Storage class for platform global data."""
-    lights: list[tuple[str, Output]]
+    lights: list[list]
 
 async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
     """Set up the ColorBeam integration."""
@@ -39,47 +39,57 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
     device_registry = dr.async_get(hass)
 
     _LOGGER.info("adding devices")
-    
+
     entry_data = ColorBeamData(
         lights = []
     )
 
-    _async_check_entity_unique_id(
-        hass,
-        entity_registry,
-        platform,
-        output.uuid,
-        output.legacy_uuid,
-        entry_data.client.guid,
-    )
-    _async_check_device_identifiers(
-        hass,
-        device_registry,
-        output.uuid,
-        output.legacy_uuid,
-        entry_data.client.guid,
-    )
+    for RGB_x in RGB:
+        entry_data.lights.append([RGB_x])
+        platform = Platform.LIGHT
+        _async_check_entity_unique_id(
+            hass,
+            entity_registry,
+            platform,
+            lightid=RGB_x
+        )
+        _async_check_device_identifiers(
+            hass,
+            device_registry,
+            lightid=RGB_x
+        )
+    
+    for BI_x in BI:
+        entry_data.lights.append([BI_x])
+        platform = Platform.LIGHT
+        _async_check_entity_unique_id(
+            hass,
+            entity_registry,
+            platform,
+            lightid=BI_x
+        )
+        _async_check_device_identifiers(
+            hass,
+            device_registry,
+            lightid=BI_x
+        )
     
 def _async_check_entity_unique_id(
     hass: HomeAssistant,
     entity_registry: er.EntityRegistry,
     platform: str,
-    uuid: str,
-    legacy_uuid: str,
-    controller_guid: str,
+    configentry : ConfigEntry,
+    lightid: str
 ) -> None:
     """If uuid becomes available update to use it."""
 
-    if not uuid:
-        return
-
-    unique_id = f"{controller_guid}_{legacy_uuid}"
+    unique_id = f"{configentry.ID}_{lightid}"
     entity_id = entity_registry.async_get_entity_id(
         domain=platform, platform=DOMAIN, unique_id=unique_id
     )
 
     if entity_id:
-        new_unique_id = f"{controller_guid}_{uuid}"
+        new_unique_id = f"{configentry.ID}_{lightid}"
         _LOGGER.debug("Updating entity id from %s to %s", unique_id, new_unique_id)
         entity_registry.async_update_entity(entity_id, new_unique_id=new_unique_id)
 
@@ -87,19 +97,16 @@ def _async_check_entity_unique_id(
 def _async_check_device_identifiers(
     hass: HomeAssistant,
     device_registry: dr.DeviceRegistry,
-    uuid: str,
-    legacy_uuid: str,
-    controller_guid: str,
+    configentry: ConfigEntry,
+    lightid: str
 ) -> None:
     """If uuid becomes available update to use it."""
 
-    if not uuid:
-        return
 
-    unique_id = f"{controller_guid}_{legacy_uuid}"
+    unique_id = f"{configentry.ID}_{lightid}"
     device = device_registry.async_get_device(identifiers={(DOMAIN, unique_id)})
     if device:
-        new_unique_id = f"{controller_guid}_{uuid}"
+        new_unique_id = f"{configentry.ID}_{lightid}"
         _LOGGER.debug("Updating device id from %s to %s", unique_id, new_unique_id)
         device_registry.async_update_device(
             device.id, new_identifiers={(DOMAIN, new_unique_id)}
