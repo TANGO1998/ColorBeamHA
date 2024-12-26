@@ -10,6 +10,7 @@ from homeassistant.helpers import device_registry as dr, entity_registry as er
 
 from .const import DOMAIN
 from .pycolorbeam import ColorBeamBaseInstance,ColorBeamLightInstance,ColorBeamRGBLightInstance
+
 PLATFORMS = [
     Platform.LIGHT,
 ]
@@ -51,11 +52,13 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
             hass,
             entity_registry,
             platform,
+            configentry=config_entry,
             lightid=RGB_x
         )
         _async_check_device_identifiers(
             hass,
             device_registry,
+            configentry=config_entry,
             lightid=RGB_x
         )
     
@@ -66,13 +69,26 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
             hass,
             entity_registry,
             platform,
+            configentry=config_entry,
             lightid=BI_x
         )
         _async_check_device_identifiers(
             hass,
             device_registry,
+            configentry=config_entry,
             lightid=BI_x
         )
+
+    device_registry.async_get_or_create(
+        config_entry_id=config_entry.entry_id,
+        identifiers={(DOMAIN,config_entry.entry_id)},
+        manufacturer="ColorBeam",
+        name="main Controller",
+    )
+    
+    hass.data.setdefault(DOMAIN,{})[config_entry.entry_id] = entry_data
+
+    await hass.config_entries.async_forward_entry_setups(config_entry,PLATFORMS)
     
 def _async_check_entity_unique_id(
     hass: HomeAssistant,
@@ -83,13 +99,13 @@ def _async_check_entity_unique_id(
 ) -> None:
     """If uuid becomes available update to use it."""
 
-    unique_id = f"{configentry.ID}_{lightid}"
+    unique_id = f"{configentry.entry_id}_{lightid}"
     entity_id = entity_registry.async_get_entity_id(
         domain=platform, platform=DOMAIN, unique_id=unique_id
     )
 
     if entity_id:
-        new_unique_id = f"{configentry.ID}_{lightid}"
+        new_unique_id = f"{configentry.entry_id}_{lightid}"
         _LOGGER.debug("Updating entity id from %s to %s", unique_id, new_unique_id)
         entity_registry.async_update_entity(entity_id, new_unique_id=new_unique_id)
 
@@ -103,10 +119,10 @@ def _async_check_device_identifiers(
     """If uuid becomes available update to use it."""
 
 
-    unique_id = f"{configentry.ID}_{lightid}"
+    unique_id = f"{configentry.entry_id}_{lightid}"
     device = device_registry.async_get_device(identifiers={(DOMAIN, unique_id)})
     if device:
-        new_unique_id = f"{configentry.ID}_{lightid}"
+        new_unique_id = f"{configentry.entry_id}_{lightid}"
         _LOGGER.debug("Updating device id from %s to %s", unique_id, new_unique_id)
         device_registry.async_update_device(
             device.id, new_identifiers={(DOMAIN, new_unique_id)}
