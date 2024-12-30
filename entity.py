@@ -17,10 +17,10 @@ class ColorBeamBaseEntity(Entity):
     _attr_has_entity_name = True
 
     def __init__(
-            self,ColorBeamDevice: ConfigEntry
+            self,ColorBeamDeviceUuid: ConfigEntry.entry_id
     )-> None:
         """initalize the device."""
-        self._colorbeamdevice = ColorBeamDevice
+        self._uuid = ColorBeamDeviceUuid
 
     async def async_added_to_hass(self) -> None:
         """Register callbacks."""
@@ -43,6 +43,19 @@ class ColorBeamBaseEntity(Entity):
     def unique_id(self)->str:
         """Return a unique ID."""
 
-        
+        return self._uuid
+    
+    def update(self)->None:
+        """Update the entity's state."""
+        self._request_state()
+        self._update_attrs()
+
+class ColorBeamLightDevice(ColorBeamBaseEntity):
+    """Representation of a ColorBeam Light Device"""
+
+    def __init__(
+            self
+    )->None:
+
 
         
