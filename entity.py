@@ -32,4 +32,17 @@ class ColorBeamBaseEntity(Entity):
     def _update_attrs(self) -> None:
         """Update the entity's attributes."""
 
+    def _update_callback(
+            self,_context: None,_params:dict
+    )-> None:
+        """RUn when invoked by pycolorbeam when the device state changes."""
+        self._update_attrs()
+        self.schedule_update_ha_state()
+    
+    @property
+    def unique_id(self)->str:
+        """Return a unique ID."""
+
+        
+
         
