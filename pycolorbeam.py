@@ -5,7 +5,9 @@ import json
 _LOGGER = logging.getLogger(__name__)
 
 class ColorBeamLightInstance:
-    def __init__(self,ipAddress:str,port:str,id=str) -> None:
+    def __init__(
+            self,ipAddress:str,port:str,id=int
+            ) -> None:
         self._ipAddress = ipAddress
         self._port = port
         self._id = id
@@ -57,19 +59,19 @@ class ColorBeamLightInstance:
     def Temp(self)-> int:
         return self._temp
     
-    async def turn_on(self,brightness):
-        command ={"command":"SetLoads","params":[{"id":self._id,"d":750,"l":brightness}]}
+    async def turn_on(self,brightness,transistion:int=750):
+        command ={"command":"SetLoads","params":[{"id":self._id,"d":transistion,"l":brightness}]}
         await self._send(command)
         _LOGGER.debug('command sent:%s'.format(command))
         await asyncio.sleep(2)
-        await self.update()
+        #await self.update()
 
-    async def turn_off(self):
-        command = {"command":"SetLoads","params":[{"id":self._id,"d":750,"l":0}]}
+    async def turn_off(self,transistion:int=750):
+        command = {"command":"SetLoads","params":[{"id":self._id,"d":transistion,"l":0}]}
         await self._send(command)
         _LOGGER.debug('command sent:%s'.format(command))
         await asyncio.sleep(2)
-        await self.update()
+        #await self.update()
 
     async def setBrightness(self,brightness):
         command = {"command":"SetLoads","params":[{"id":self.id,"d":750,"l":brightness}]}
@@ -121,7 +123,7 @@ class ColorBeamLightInstance:
         self._connected = False
 
 class ColorBeamRGBLightInstance:
-    def __init__(self,ipAddress:str,port:str,id=str) -> None:
+    def __init__(self,ipAddress:str,port:str,id=int) -> None:
         self._ipAddress = ipAddress
         self._port = port
         self._id = id
@@ -172,15 +174,15 @@ class ColorBeamRGBLightInstance:
     def getRGB(self)-> tuple:
         return tuple(self._RGBValue)
     
-    async def turn_on(self,brightness):
-        command ={"command":"SetLoads","params":[{"id":self._id,"d":750,"l":brightness}]}
+    async def turn_on(self,brightness,transition:int=750):
+        command ={"command":"SetLoads","params":[{"id":self._id,"d":transition,"l":brightness}]}
         await self._send(command)
         await asyncio.sleep(2)
         _LOGGER.debug('command sent:%s'.format(command))
         #await self.update()
 
-    async def turn_off(self):
-        command = {"command":"SetLoads","params":[{"id":self._id,"d":750,"l":0}]}
+    async def turn_off(self,transition:int=750):
+        command = {"command":"SetLoads","params":[{"id":self._id,"d":transition,"l":0}]}
         await self._send(command)
         _LOGGER.debug('command sent:%s'.format(command))
         await asyncio.sleep(1)
@@ -197,7 +199,7 @@ class ColorBeamRGBLightInstance:
         await self._send(command)
         _LOGGER.debug('command sent:%s'.format(command))
         #await self.update()
-        self._RGBValue = list(RGB)
+        self._RGBValue = tuple(RGB)
     
     async def update(self):
         command = {"command":"GetLoadStatus","params":[self.id]}
@@ -242,8 +244,8 @@ class ColorBeamBaseInstance:
         self._port = port
         self._id = id
         self._connected = None
-        self._BILights = []
-        self._RGBLights = []
+        self._BILights = set()
+        self._RGBLights = set()
         self._reader = None
         self._writer = None
 
@@ -280,12 +282,19 @@ class ColorBeamBaseInstance:
         await self._send(command)
         _LOGGER.debug('command Sent:%s'.format(command))
         data = await self._reader.readuntil(b"}]}}")
-       # print(data)
+        # print(data)
         data = json.loads(data.decode("utf-8"))
         for x in data["data"]["load_status"]:
             if "r" in x:
-                self._RGBLights.append(x["id"])
+                self._RGBLights.add(x["id"])
             else:
-                self._BILights.append(x["id"])
+                self._BILights.add(x["id"])
         return self._BILights, self._RGBLights
-        
+    
+    async def getversion(self):
+        command = {"command" : "GetVersion"}
+        await self._send(command)
+        _LOGGER.debug('command Sent:%s'.format(command))
+        data = await self._reader.readuntil(b"}}")
+        data = json.loads(data.decode("utf-8"))
+        return data["data"]
