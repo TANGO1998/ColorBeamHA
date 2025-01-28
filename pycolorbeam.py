@@ -200,6 +200,21 @@ class ColorBeamRGBLightInstance:
         _LOGGER.debug('command sent:%s'.format(command))
         #await self.update()
         self._RGBValue = tuple(RGB)
+
+    async def setRGBW(self,RGBW:tuple):
+        command = {"command":"SetLoads","params":[{"id":self.id,"r":RGBW[0],"g":RGBW[1],"b":RGBW[2],"w":RGBW[3]}]}
+        await self._send(command)
+        _LOGGER.debug('command sent:%s'.format(command))
+        #await self.update()
+        self._RGBValue = tuple(RGBW)
+
+    async def setRGBWW(self,RGBWW:tuple):
+        command = {"command":"SetLoads","params":[{"id":self.id,"r":RGBWW[0],"g":RGBWW[1],"b":RGBWW[2],"w":RGBWW[3],"ww":RGBWW[4]}]}
+        await self._send(command)
+        _LOGGER.debug('command sent:%s'.format(command))
+        #await self.update()
+        self._RGBValue = tuple(RGBWW)
+
     
     async def update(self):
         command = {"command":"GetLoadStatus","params":[self.id]}
@@ -220,6 +235,11 @@ class ColorBeamRGBLightInstance:
                     self._RGBValue.append(response["data"]["load_status"][0]["r"])
                     self._RGBValue.append(response["data"]["load_status"][0]["g"])
                     self._RGBValue.append(response["data"]["load_status"][0]["b"])
+                    if "w" in response["data"]["loadstatus"][0]:
+                        self._RGBValue.append(response["data"]["loadstatus"][0]["w"])
+                    if "ww" in response["data"]["loadstatus"][0]:
+                        self._RGBValue.append(response["data"]["loadstatus"][0]["w"])
+                        self._RGBValue.append(response["data"]["loadstatus"][0]["ww"])
                     _LOGGER.debug('instance updated')
             except Exception as e:
                 pass
