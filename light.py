@@ -99,11 +99,10 @@ class CbBiLight(LightEntity):
     def device_info(self)-> DeviceInfo:
         """return device Info"""
         return DeviceInfo(
-            identifiers={(DOMAIN,"CB_5A:56:B0")},
+            identifiers={(DOMAIN,f"CB_{self._attr_unique_id}_light")},
             name=self._name,
             manufacturer="color Beam",
             sw_version= self._version,
-            via_device=(DOMAIN,"B8:27:EB:5A:56:B0")
         )
 
     @property
@@ -188,11 +187,10 @@ class CbRGBLight(LightEntity):
     def device_info(self)-> DeviceInfo:
         """return device Info"""
         return DeviceInfo(
-            identifiers={(DOMAIN,"CB_5A:56:B0")},
+            identifiers={(DOMAIN,f"CB_{self._attr_unique_id}_light")},
             name=self._name,
             manufacturer="color Beam",
             sw_version= self._version,
-            via_device=(DOMAIN,"B8:27:EB:5A:56:B0")
         )
 
     @property
