@@ -1,4 +1,4 @@
-from pycolorbeam import ColorBeamLightInstance,ColorBeamRGBLightInstance
+from colorbeam/pycolorbeam import ColorBeamLightInstance,ColorBeamRGBLightInstance
 import asyncio
 import logging
 
