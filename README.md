@@ -12,7 +12,3 @@ Then go to Devices & integration and select Color Beam integration
 * **port** (required) : the port which is used to communicate with the API (usually 3334)
 
 for more information on setting up the gateway [[Color Beam](https://colorbeamlighting.com)]
-
-
-
-
