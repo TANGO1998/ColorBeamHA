@@ -9,7 +9,7 @@ from .pycolorbeam import ColorBeamBaseInstance,ColorBeamLightInstance,ColorBeamR
 
 # Import the device class from the component that you want to support
 import homeassistant.helpers.config_validation as cv
-from homeassistant.components.light import (ColorMode,ATTR_COLOR_TEMP_KELVIN,ATTR_BRIGHTNESS,ATTR_TRANSITION, ATTR_RGB_COLOR,
+from homeassistant.components.light import (ColorMode,ATTR_COLOR_TEMP_KELVIN,ATTR_BRIGHTNESS,ATTR_TRANSITION, ATTR_RGB_COLOR,ATTR_RGBW_COLOR,ATTR_RGBWW_COLOR,
                                             LightEntity,LightEntityFeature,filter_supported_color_modes)
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant,callback
@@ -168,8 +168,6 @@ class CbBiLight(LightEntity):
 
 class CbRGBLight(LightEntity):
     """Representation of an ColorBeam Light."""
-    _attr_color_mode = ColorMode.RGB
-    _attr_supported_color_modes = {ColorMode.RGB}
     _attr_supported_features = LightEntityFeature.TRANSITION
 
     def __init__(self, light) -> None:
@@ -177,9 +175,11 @@ class CbRGBLight(LightEntity):
         self._light = ColorBeamRGBLightInstance(light["ip"],light["port"],light["id"])
         self._name = light["name"]
         self._state = None
+        self._attr_colorMode = self.colorMode()
+        self._attr_supported_color_modes = self.supported_color_modes()
         self._attr_brightness = None
         self._previous_brightness = 255
-        self. _attr_rgb_color = (255,255,255)
+        self. _attr_rgb_color = None
         self._attr_unique_id = light["uuid"]
         self._version = light['version']
 
@@ -213,8 +213,25 @@ class CbRGBLight(LightEntity):
         return self._state
     @property
     def rgb_color(self) -> tuple | None:
-        """Return Color Temp"""
+        """Return Color """
         return self._attr_rgb_color
+    @property
+    def colorMode(self) -> ColorMode:
+        """return color mode"""
+        if self._attr_rgb_color.count() == 5:
+            return ColorMode.RGBWW
+        elif self._attr_rgb_color.count() == 4:
+            return ColorMode.RGBW
+        else:
+            return ColorMode.RGB
+    @property
+    def supported_color_modes(self):
+        if self.colormode() == ColorMode.RGBWW:
+            return {ColorMode.RGBWW}
+        elif self.colorMode() == ColorMode.RGBW:
+            return {ColorMode.RGBW}
+        else:
+            return {ColorMode.RGB}
 
     async def async_turn_on(self, **kwargs: Any) -> None:
         """Instruct the light to turn on.
