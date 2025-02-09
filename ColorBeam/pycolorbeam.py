@@ -195,27 +195,17 @@ class ColorBeamRGBLightInstance:
         #await self.update()
     
     async def setRGB(self,RGB:tuple):
-        command = {"command":"SetLoads","params":[{"id":self.id,"r":RGB[0],"g":RGB[1],"b":RGB[2]}]}
+        if RGB.count() == 5:
+            command = {"command":"SetLoads","params":[{"id":self.id,"r":RGB[0],"g":RGB[1],"b":RGB[2],"w":RGB[3],"ww":RGB[4]}]}
+        elif RGB.count()== 4:
+             command = {"command":"SetLoads","params":[{"id":self.id,"r":RGB[0],"g":RGB[1],"b":RGB[2],"w":RGB[3]}]}
+        else:
+            command = {"command":"SetLoads","params":[{"id":self.id,"r":RGB[0],"g":RGB[1],"b":RGB[2]}]}
         await self._send(command)
         _LOGGER.debug('command sent:%s'.format(command))
         #await self.update()
         self._RGBValue = tuple(RGB)
-
-    async def setRGBW(self,RGBW:tuple):
-        command = {"command":"SetLoads","params":[{"id":self.id,"r":RGBW[0],"g":RGBW[1],"b":RGBW[2],"w":RGBW[3]}]}
-        await self._send(command)
-        _LOGGER.debug('command sent:%s'.format(command))
-        #await self.update()
-        self._RGBValue = tuple(RGBW)
-
-    async def setRGBWW(self,RGBWW:tuple):
-        command = {"command":"SetLoads","params":[{"id":self.id,"r":RGBWW[0],"g":RGBWW[1],"b":RGBWW[2],"w":RGBWW[3],"ww":RGBWW[4]}]}
-        await self._send(command)
-        _LOGGER.debug('command sent:%s'.format(command))
-        #await self.update()
-        self._RGBValue = tuple(RGBWW)
-
-    
+      
     async def update(self):
         command = {"command":"GetLoadStatus","params":[self.id]}
         await self._send(command)
