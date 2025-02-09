@@ -247,6 +247,10 @@ class CbRGBLight(LightEntity):
             brightness = self._previous_brightness
         if ATTR_RGB_COLOR in kwargs:
             rgb_color = kwargs.pop(ATTR_RGB_COLOR)
+        elif ATTR_RGBW_COLOR in kwargs:
+            rgb_color = kwargs.pop(ATTR_RGBW_COLOR)
+        elif ATTR_RGBWW_COLOR in kwargs:
+            rgb_color = kwargs.pop(ATTR_RGBWW_COLOR)
         else:
             rgb_color = self._attr_rgb_color
         await self._light.setRGB(rgb_color)
