@@ -20,6 +20,7 @@ from .const import DOMAIN
 from datetime import timedelta
 
 _LOGGER = logging.getLogger(__name__)
+_LOGGER.setLevel(logging.DEBUG)
 
 SCAN_INTERVAL = timedelta(seconds=30)
 
@@ -175,11 +176,11 @@ class CbRGBLight(LightEntity):
         self._light = ColorBeamRGBLightInstance(light["ip"],light["port"],light["id"])
         self._name = light["name"]
         self._state = None
-        self._attr_colorMode = self.colorMode()
-        self._attr_supported_color_modes = self.supported_color_modes()
         self._attr_brightness = None
         self._previous_brightness = 255
         self. _attr_rgb_color = None
+        self._attr_colorMode = None
+        self._attr_supported_color_modes = None
         self._attr_unique_id = light["uuid"]
         self._version = light['version']
 
@@ -216,7 +217,7 @@ class CbRGBLight(LightEntity):
         """Return Color """
         return self._attr_rgb_color
     @property
-    def colorMode(self) -> ColorMode:
+    def color_mode(self) -> ColorMode:
         """return color mode"""
         if len(self._attr_rgb_color) == 5:
             return ColorMode.RGBWW
@@ -226,9 +227,10 @@ class CbRGBLight(LightEntity):
             return ColorMode.RGB
     @property
     def supported_color_modes(self):
-        if self.colormode() == ColorMode.RGBWW:
+        color_mode = self.color_mode
+        if color_mode== ColorMode.RGBWW:
             return {ColorMode.RGBWW}
-        elif self.colorMode() == ColorMode.RGBW:
+        elif color_mode == ColorMode.RGBW:
             return {ColorMode.RGBW}
         else:
             return {ColorMode.RGB}
@@ -245,12 +247,12 @@ class CbRGBLight(LightEntity):
             brightness = 255/2
         else:
             brightness = self._previous_brightness
-        if ATTR_RGB_COLOR in kwargs:
-            rgb_color = kwargs.pop(ATTR_RGB_COLOR)
+        if ATTR_RGBWW_COLOR in kwargs:
+            rgb_color = kwargs.pop(ATTR_RGBWW_COLOR)
         elif ATTR_RGBW_COLOR in kwargs:
             rgb_color = kwargs.pop(ATTR_RGBW_COLOR)
-        elif ATTR_RGBWW_COLOR in kwargs:
-            rgb_color = kwargs.pop(ATTR_RGBWW_COLOR)
+        elif ATTR_RGB_COLOR in kwargs:
+            rgb_color = kwargs.pop(ATTR_RGB_COLOR)
         else:
             rgb_color = self._attr_rgb_color
         await self._light.setRGB(rgb_color)
@@ -270,5 +272,8 @@ class CbRGBLight(LightEntity):
         """
         await self._light.update()
         self. _attr_rgb_color = self._light.getRGB
+        _LOGGER.debug(self._attr_rgb_color)
         self._state = self._light.is_on
         self._attr_brightness = self._light.Getbrightness
+        self._attr_colorMode = self.color_mode
+        self._attr_supported_color_modes = self.supported_color_modes
