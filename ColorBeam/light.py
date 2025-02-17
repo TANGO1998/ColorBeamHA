@@ -218,9 +218,9 @@ class CbRGBLight(LightEntity):
     @property
     def colorMode(self) -> ColorMode:
         """return color mode"""
-        if self._attr_rgb_color.count() == 5:
+        if len(self._attr_rgb_color) == 5:
             return ColorMode.RGBWW
-        elif self._attr_rgb_color.count() == 4:
+        elif len(self._attr_rgb_color) == 4:
             return ColorMode.RGBW
         else:
             return ColorMode.RGB

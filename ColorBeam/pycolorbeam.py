@@ -195,9 +195,9 @@ class ColorBeamRGBLightInstance:
         #await self.update()
     
     async def setRGB(self,RGB:tuple):
-        if RGB.count() == 5:
+        if len(RGB) == 5:
             command = {"command":"SetLoads","params":[{"id":self.id,"r":RGB[0],"g":RGB[1],"b":RGB[2],"w":RGB[3],"ww":RGB[4]}]}
-        elif RGB.count()== 4:
+        elif len(RGB)== 4:
              command = {"command":"SetLoads","params":[{"id":self.id,"r":RGB[0],"g":RGB[1],"b":RGB[2],"w":RGB[3]}]}
         else:
             command = {"command":"SetLoads","params":[{"id":self.id,"r":RGB[0],"g":RGB[1],"b":RGB[2]}]}
