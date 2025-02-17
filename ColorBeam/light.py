@@ -272,8 +272,9 @@ class CbRGBLight(LightEntity):
         """
         await self._light.update()
         self. _attr_rgb_color = self._light.getRGB
+        self._attr_colorMode = self.color_mode
+        self._attr_supported_color_modes = self.supported_color_modes
         _LOGGER.debug(self._attr_rgb_color)
         self._state = self._light.is_on
         self._attr_brightness = self._light.Getbrightness
-        self._attr_colorMode = self.color_mode
-        self._attr_supported_color_modes = self.supported_color_modes
+        
