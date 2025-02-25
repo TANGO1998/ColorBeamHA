@@ -216,6 +216,7 @@ class ColorBeamRGBLightInstance:
             try:
                 response = json.loads(x)
                 if "load_status" in response["data"]:
+                    print(response["data"]["load_status"])
                     if response["data"]["load_status"][0]["l"] > 0 :
                         self._isOn = True
                     if response["data"]["load_status"][0]["l"] == 0 :
@@ -226,7 +227,7 @@ class ColorBeamRGBLightInstance:
                     self._RGBValue.append(response["data"]["load_status"][0]["g"])
                     self._RGBValue.append(response["data"]["load_status"][0]["b"])
                     if "w" in response["data"]["load_status"][0]:
-                        self._RGBValue.append(response["data"]["loads_tatus"][0]["w"])
+                        self._RGBValue.append(response["data"]["load_status"][0]["w"])
                     if "ww" in response["data"]["load_status"][0]:
                         self._RGBValue.append(response["data"]["load_status"][0]["ww"])
                     _LOGGER.debug('instance updated')
