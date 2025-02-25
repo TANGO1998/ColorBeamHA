@@ -217,6 +217,14 @@ class CbRGBLight(LightEntity):
         """Return Color """
         return self._attr_rgb_color
     @property
+    def rgbw_color(self) -> tuple | None:
+        """Return Color """
+        return self._attr_rgb_color
+    @property
+    def rgbww_color(self) -> tuple | None:
+        """Return Color """
+        return self._attr_rgb_color
+    @property
     def color_mode(self) -> ColorMode:
         """return color mode"""
         if len(self._attr_rgb_color) == 5:
