@@ -25,8 +25,8 @@ class ColorBeamConfigFlow(ConfigFlow, domain=DOMAIN):
         """First step in the config flow."""
 
         #Check if a configuration entry already exists
-        if self._async_current_entries():
-            return self.async_abort(reason="single_instance_allowed")
+        #if self._async_current_entries():
+            #return self.async_abort(reason="single_instance_allowed")
         
         errors = {}
 
