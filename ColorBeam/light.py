@@ -31,6 +31,7 @@ async def async_setup_entry(
 ) -> None:
     """Set up the ColorBeam Light platform."""
     coordinator : ColorBeamUpdateCoordinator = hass.data[DOMAIN][entry.entry_id]
+    deviceLoadNames = coordinator.LoadNames
 
     known_devices_BI: set[int] = set()
     known_devices_RGB: set[int] = set()
@@ -46,7 +47,7 @@ async def async_setup_entry(
                 light = {
                     "ip" : entry.data["host"],
                     "port" :entry.data["port"],
-                    "name" : f"colorBeamRGB {RGB}",
+                    "name" : deviceLoadNames[str(RGB)]['name'],
                     "id" : RGB,
                     "uuid" : f"CB_{RGB}_light",
                     "version":coordinator.version
@@ -60,7 +61,7 @@ async def async_setup_entry(
                 light = {
                     "ip" : entry.data["host"],
                     "port" :entry.data["port"],
-                    "name" : f"colorBeamBI {BI}",
+                    "name" : deviceLoadNames[str(BI)]['name'],
                     "id" : BI,
                     "uuid" : f"CB_{BI}_light",
                     "version": coordinator.version

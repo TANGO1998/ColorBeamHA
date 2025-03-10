@@ -11,7 +11,7 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 from .const import DOMAIN
 from .pycolorbeam import ColorBeamBaseInstance,ColorBeamLightInstance,ColorBeamRGBLightInstance
 
-UPDATE_INTERVAL = 30
+UPDATE_INTERVAL = 20
 _LOGGER = logging.getLogger(__name__)
 
 class ColorBeamUpdateCoordinator(DataUpdateCoordinator[dict]):
@@ -20,6 +20,7 @@ class ColorBeamUpdateCoordinator(DataUpdateCoordinator[dict]):
     RGB: list
     BI:list
     version:str
+    LoadNames:dict
 
     def __init__(self,hass: HomeAssistant,name:str,client:ColorBeamBaseInstance
                  )->None:
@@ -39,14 +40,18 @@ class ColorBeamUpdateCoordinator(DataUpdateCoordinator[dict]):
     def BIlights(self)->list:
         return self.BI
 
+    def LoadNames(self)->dict:
+        return self.LoadNames
+
     async def _async_update_data(self) -> dict:
         """Update ColorBeam data."""
 
-        if not hasattr(self,"RGB") or not hasattr(self,"BI"):
+        if not hasattr(self,"RGB") or not hasattr(self,"BI") or not hasattr(self,"LoadNames"):
             async with asyncio.timeout(10):
                 try:
-                    self.BI , self.RGB = self.client.updateall()
-                    self.version = self.client.getversion()
+                    self.BI , self.RGB = await self.client.updateall()
+                    self.version = await self.client.getversion()
+                    self.LoadNames = await self.client.getLoadStore()
                 except Exception as e:
                     _LOGGER.error(e)
         
@@ -83,7 +88,7 @@ class ColorBeamBiUpdateCoordinator(DataUpdateCoordinator[dict]):
         if not hasattr(self.data):
             async with asyncio.timeout(10):
                 try:
-                    self.data = self.client.update()
+                    self.data = await self.client.update()
                 except Exception as e:
                     _LOGGER.error(e)
 
@@ -120,6 +125,6 @@ class ColorBeamRGBUpdateCoordinator(DataUpdateCoordinator[dict]):
         if not hasattr(self.data):
             async with asyncio.timeout(10):
                 try:
-                    self.data = self.client.update()
+                    self.data = await self.client.update()
                 except Exception as e:
                     _LOGGER.error(e)
