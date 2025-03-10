@@ -11,7 +11,7 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 from .const import DOMAIN
 from .pycolorbeam import ColorBeamBaseInstance,ColorBeamLightInstance,ColorBeamRGBLightInstance
 
-UPDATE_INTERVAL = 30
+UPDATE_INTERVAL = 20
 _LOGGER = logging.getLogger(__name__)
 
 class ColorBeamUpdateCoordinator(DataUpdateCoordinator[dict]):
