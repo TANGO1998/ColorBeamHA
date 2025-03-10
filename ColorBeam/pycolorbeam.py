@@ -256,6 +256,7 @@ class ColorBeamBaseInstance:
         self._connected = None
         self._BILights = set()
         self._RGBLights = set()
+        self._LoadNames = dict()
         self._reader = None
         self._writer = None
 
@@ -308,3 +309,13 @@ class ColorBeamBaseInstance:
         data = await self._reader.readuntil(b"}}")
         data = json.loads(data.decode("utf-8"))
         return data["data"]
+    
+    async def getLoadStore(self):
+        command = {"command": "GetLoadStore"}
+        await self._send(command)
+        _LOGGER.debug('command Sent:%s'.format(command))
+        data = await self._reader.readuntil(b"}]}}")
+        data = json.loads(data.decode("utf-8"))
+        for x in data["data"]["load_store"]:
+            self._LoadNames[str(x['id'])] = {'name': x['name']}
+        return self._LoadNames
