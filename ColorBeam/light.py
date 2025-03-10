@@ -31,6 +31,7 @@ async def async_setup_entry(
 ) -> None:
     """Set up the ColorBeam Light platform."""
     coordinator : ColorBeamUpdateCoordinator = hass.data[DOMAIN][entry.entry_id]
+    deviceLoadNames = coordinator.LoadNames
 
     known_devices_BI: set[int] = set()
     known_devices_RGB: set[int] = set()
@@ -38,7 +39,6 @@ async def async_setup_entry(
     def check_device()->None:
         current_devices_RGB = coordinator.RGBlights
         current_devices_BI = coordinator.BIlights
-        deviceLoadNames = coordinator.LoadNames
         new_devices_RGB = current_devices_RGB-known_devices_RGB
         new_devices_BI = current_devices_BI-known_devices_BI
 
