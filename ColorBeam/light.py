@@ -38,6 +38,7 @@ async def async_setup_entry(
     def check_device()->None:
         current_devices_RGB = coordinator.RGBlights
         current_devices_BI = coordinator.BIlights
+        deviceLoadNames = coordinator.LoadNames
         new_devices_RGB = current_devices_RGB-known_devices_RGB
         new_devices_BI = current_devices_BI-known_devices_BI
 
@@ -46,7 +47,7 @@ async def async_setup_entry(
                 light = {
                     "ip" : entry.data["host"],
                     "port" :entry.data["port"],
-                    "name" : f"colorBeamRGB {RGB}",
+                    "name" : deviceLoadNames[str(RGB)]['name'],
                     "id" : RGB,
                     "uuid" : f"CB_{RGB}_light",
                     "version":coordinator.version
@@ -60,7 +61,7 @@ async def async_setup_entry(
                 light = {
                     "ip" : entry.data["host"],
                     "port" :entry.data["port"],
-                    "name" : f"colorBeamBI {BI}",
+                    "name" : deviceLoadNames[str(BI)]['name'],
                     "id" : BI,
                     "uuid" : f"CB_{BI}_light",
                     "version": coordinator.version
